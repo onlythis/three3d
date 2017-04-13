@@ -76,7 +76,6 @@
 			if(openings<=2){
 				skips+=1;
 			}
-			if(skips==3){
 				for(var z =0; z<6; z++){
 					if(checkgrid2(posx,posy,posz,z)==0){
 						var newpath=growbranch(posx,posy,posz,treesize,z);
@@ -84,8 +83,6 @@
 						roots[1].push(newpath);
 					}
 				}
-				return 0;
-			}
 			if(dirr==0){
 				posy+=1
 			}
@@ -112,7 +109,7 @@
 		var dirr=initdirr;
 		for(var i = 0; i<length; i++) {
 			var dirr=dont_turn_back(initdirr,dirr);
-			if(i<8){
+			if(i<4){
 				dirr=initdirr;
 			}
 			var n=0;
@@ -329,6 +326,76 @@
 			}
 		}
 	}
+//gen positions in order
+	function genPositions(){
+		var poss = [];
+		for(var x = 0; x<roots[0].length; x++) {
+			var curr = roots[0][x];
+			//poss.push(new Array(curr[0],curr[1],curr[2]));
+			for(var y = 0; y<roots[1][x].length; y++) {
+				let dirr = roots[1][x][y];
+				if(dirr==0){
+					curr[1]+=1;
+				}
+				if(dirr==1){
+					curr[0]+=1;
+				}
+				if(dirr==2){
+					curr[1]-=1;
+				}
+				if(dirr==3){
+					curr[0]-=1;
+				}
+				if(dirr==4){
+					curr[2]+=1;
+				}
+				if(dirr==5){
+					curr[2]-=1;
+				}
+				poss.push(new Array(curr[0],curr[1],curr[2]));
+			}
+		}
+		return poss;
+	}
+
+
+	function growTree(index){
+		let curr=0;
+	  var x=0;
+		while(curr<=index){
+			try{
+			curr+=roots[1][x].length;
+		} catch(e) { return null;}
+			x+=1;
+		}
+		x-=1;
+		let offset = curr-index;
+		let offset2 = roots[1][x].length - offset;
+		var pos = new Array(roots[0][x][0],roots[0][x][1], roots[0][x][2]);
+		for(var y = 0; y<offset2; y++){
+			let dirr = roots[1][x][y];
+			if(dirr==0){
+				pos[1]+=1;
+			}
+			if(dirr==1){
+				pos[0]+=1;
+			}
+			if(dirr==2){
+				pos[1]-=1;
+			}
+			if(dirr==3){
+				pos[0]-=1;
+			}
+			if(dirr==4){
+				pos[2]+=1;
+			}
+			if(dirr==5){
+				pos[2]-=1;
+			}
+		}
+		return pos;
+	}
+
 	let scene, camera, renderer, controls;
 
 	let particles, saturn, box, arr;
@@ -343,9 +410,11 @@
 
 	function init() {
 		scene = new THREE.Scene();
-		camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+		camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 1000);
 		camera.lookAt(scene.position);
 		camera.position.z = 200;
+		camera.position.y = 50;
+		camera.position.x = 50;
 
 		renderer = new THREE.WebGLRenderer();
 		renderer.setPixelRatio(window.devicePixelRatio);
@@ -386,27 +455,46 @@
 	}
 
 	var position = 20;
-	var ler = 0.0;
+	var ler = 0.006;
+	var interval = 0.0;
+	var index = 0;
+	var stillgrowing = true;
+	var poses = genPositions();
+	var yellow = new THREE.Color("rgb(128, 128, 0)");
 	function render() {
-		if(ler==0){
-			drawGrid();
-		}
-		ler+=0.001;
-		if(ler<.02){
-			for(var x = 0; x<arr.length; x++){
-				arr[x].material.color.lerp(new THREE.Color("rgb(255, 255, 0)"),ler);
+		if(stillgrowing==true){
+			if(index<interval*2500){
+				let pos = poses[index];
+				if(pos==null){
+					console.log("pos=null");
+					stillgrowing=false;
+				} else { drawbox(pos);}
+				index+=1;
 			}
+			interval+=0.01;
 		}
+		//dont loop over colors already yellow
+			for(var x = arr.length>50? arr.length-50: 0; x<arr.length; x++){
+				if(arr[x].material.color!=yellow){
+					arr[x].material.color.lerp(new THREE.Color("rgb(128, 128, 0)"),ler);
+				} else {console.log("else");}
+			}
 		renderer.render(scene, camera);
+	}
+
+	function render2() {
+
 	}
 
 	function drawbox(pos) {
 		box = new THREE.Group();
 		scene.add(box);
-		const boxGeo = new THREE.BoxGeometry(8,8,8);
+		const boxGeo = new THREE.CubeGeometry(8,8,8);
 		const boxMat = new THREE.MeshPhongMaterial({
 			color: new THREE.Color("rgb(255, 0, 0)"),
-			shading: THREE.FlatShading
+			shading: THREE.FlatShading,
+			transparent: true,
+			opacity: 0.25
 		});
 		const obj = new THREE.Mesh(boxGeo, boxMat);
 		obj.castShadow = true;
@@ -457,7 +545,9 @@
 		const ringGeometry = new THREE.TorusGeometry(140, 12, 6, 15);
 		const ringMeterial = new THREE.MeshStandardMaterial({
 			color: 0x6549C0,
-			shading: THREE.FlatShading
+			shading: THREE.FlatShading,
+			transparent: true,
+			opacity: 0.1
 		});
 		const ring = new THREE.Mesh(ringGeometry, ringMeterial);
 		ring.position.set(0, 40, 0)
