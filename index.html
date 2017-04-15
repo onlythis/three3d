@@ -29,9 +29,9 @@
 
 	'use strict';
 
-	var w=20;
-	var h=20;
-	var depth=20;
+	var w=10;
+	var h=10;
+	var depth=10;
 
 	var grid=new Array(w);
 	for(var x = 0; x<w; x++){
@@ -354,15 +354,15 @@
 
 	let scene, camera, renderer, controls;
 
-	let box, arr;
+	let boxes, arr;
+	boxes = [];
 	arr =[];
 	let width = window.innerWidth,
 	height = window.innerHeight;
 
 	const colors = [0x37BE95, 0xF3F3F3, 0x6549C0];
 
-	init();
-	animate();
+	let continueAnim = true;
 
 	function init() {
 		scene = new THREE.Scene();
@@ -391,8 +391,7 @@
 		light.shadow.camera.top = 100;
 		light.shadow.camera.bottom = -100;
 		scene.add(light);
-		box = new THREE.Group();
-		scene.add(box);
+		drawcenter();
 		document.body.appendChild(renderer.domElement);
 
 		window.addEventListener('resize', onResize);
@@ -405,10 +404,13 @@
 		camera.updateProjectionMatrix();
 		renderer.setSize(width, height);
 	}
-
+	var animframe;
 	function animate() {
-		requestAnimationFrame(animate);
+		animframe = requestAnimationFrame(animate);
 		render();
+		if(!continueAnim){
+			cancelAnimationFrame(animframe);
+		}
 	}
 
 	var ler = 0.01;
@@ -419,15 +421,11 @@
 	var yellow = new THREE.Color("rgb(128, 128, 0)");
 	function render() {
 		if(stillgrowing==true){
-			if(index<interval*750){
-				let pos = poses[index];
-				if(pos==null){
-					console.log("pos=null");
-					stillgrowing=false;
-				} else { drawbox(pos);}
-				index+=1;
-			}
-			interval+=0.01;
+			let pos = poses[index];
+			if(pos==null){
+				stillgrowing=false;
+			} else { drawbox(pos, index);}
+			index+=1;
 			for(var x = arr.length>100? arr.length-100: 0; x<arr.length; x++){
 				if(arr[x].material.color!=yellow){
 					arr[x].material.color.lerp(new THREE.Color("rgb(128, 128, 0)"),ler);
@@ -436,9 +434,15 @@
 					arr[x].rotateZ(-Math.PI/100);
 				} else {console.log("else");}
 			}
+		} else {
+			scene.remove(boxes[0]);
+			boxes.splice(0,1);
+			if(boxes.length==0){
+				continueAnim=false;
+			}
 		}
-		//dont loop over colors already yellow
 
+		//dont loop over colors already yellow
 		renderer.render(scene, camera);
 	}
 
@@ -448,7 +452,9 @@
 
 	const boxSize = new THREE.CubeGeometry(4,4,4);
 
-	function drawbox(pos) {
+	function drawbox(pos, index) {
+		boxes[index] = new THREE.Group();
+		scene.add(boxes[index]);
 		const boxGeo = boxSize;
 		const boxMat = new THREE.MeshPhongMaterial({
 			color: new THREE.Color("rgb(255, 0, 0)"),
@@ -461,8 +467,27 @@
 		obj.receiveShadow = true;
 		obj.position.set(pos[0]*8-(10*8), pos[1]*8-(10*8), pos[2]*8-(10*8));
 		arr.push(obj);
-		box.add(obj);
+		boxes[index].add(obj);
 	}
+	function drawcenter() {
+		let center = new THREE.Group();
+		scene.add(center);
+		const boxGeo = boxSize;
+		const boxMat = new THREE.MeshPhongMaterial({
+			color: new THREE.Color("rgb(255, 0, 0)"),
+			shading: THREE.FlatShading,
+			transparent: true,
+			opacity: 1
+		});
+		const obj = new THREE.Mesh(boxGeo, boxMat);
+		obj.castShadow = true;
+		obj.receiveShadow = true;
+		obj.position.set(0,0,0);
+		center.add(obj);
+	}
+
+	init();
+	animate();
 
 	</script>
 </body>
