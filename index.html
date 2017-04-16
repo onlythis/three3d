@@ -29,16 +29,16 @@
 
 	'use strict';
 
-	var w=10;
-	var h=10;
-	var depth=10;
+	var w=15;
+	var h=15;
+	var depth=15;
 
 	var grid=new Array(w);
-	for(var x = 0; x<w; x++){
+	for(let x = 0; x<w; x++){
 		grid[x]=new Array(h);
-		for(var y = 0; y<h; y++){
+		for(let y = 0; y<h; y++){
 			grid[x][y]=new Array(depth);
-			for(var z = 0; z<depth; z++){
+			for(let z = 0; z<depth; z++){
 				grid[x][y][z]=0;
 			}
 		}
@@ -48,22 +48,22 @@
 	var start_positions=[8,8,8];
 	var roots=[];
 	function quadTree(){
-		var depth=0;
-		var startx=start_positions[0];
-		var starty=start_positions[1];
-		var startz=start_positions[2];
+		let depth=0;
+		let startx=start_positions[0];
+		let starty=start_positions[1];
+		let startz=start_positions[2];
 		grid[startx][starty][startz]+=1;
 		roots.push([]);
 		roots[0].push([startx,starty,startz]);
 		roots.push([]);
 		roots[1].push(growbranch(startx,starty,startz,treesize,1));
 		while(true){
-			var prev=depth;
-			for(var a = 0; a<roots[0].length; a++){
-				var posx=roots[0][a][0];
-				var posy=roots[0][a][1];
-				var posz=roots[0][a][2];
-				var path=roots[1][a];
+			let prev=depth;
+			for(let a = 0; a<roots[0].length; a++){
+				let posx=roots[0][a][0];
+				let posy=roots[0][a][1];
+				let posz=roots[0][a][2];
+				let path=roots[1][a];
 				search_opendirrs(posx,posy,posz,path);
 			}
 			depth=roots[0].length;
@@ -75,15 +75,15 @@
 	}
 
 	function search_opendirrs(posx, posy, posz, path){
-		var openings=0;
-		var skips=0;
-		var dirr=-1;
-		for(var x = 0; x<path.length; x++) {
-			var dirr=path[x];
-			var openings=0;
-			for(var z =0; z<6; z++){
+		let openings=0;
+		let skips=0;
+		let dirr=-1;
+		for(let x = 0; x<path.length; x++) {
+			let dirr=path[x];
+			let openings=0;
+			for(let z =0; z<6; z++){
 				if(checkgrid2(posx,posy,posz,z)==0){
-					var newpath=growbranch(posx,posy,posz,treesize,z);
+					let newpath=growbranch(posx,posy,posz,treesize,z);
 					roots[0].push([posx,posy,posz]);
 					roots[1].push(newpath);
 				}
@@ -110,14 +110,14 @@
 	}
 
 	function growbranch(posx, posy, posz, length, initdirr){
-		var branch_path=[];
-		var dirr=initdirr;
-		for(var i = 0; i<length; i++) {
-			var dirr=dont_turn_back(initdirr,dirr);
+		let branch_path=[];
+		let dirr=initdirr;
+		for(let i = 0; i<length; i++) {
+			dirr=dont_turn_back(initdirr,dirr);
 			if(i<2){
 				dirr=initdirr;
 			}
-			var n=0;
+			let n=0;
 			while(checkgrid2(posx,posy,posz,dirr)){
 				if(n>50){
 					return branch_path;
@@ -155,8 +155,8 @@
 			if(grid[posx][posy+1][posz]>0 || posy>h-3){
 				return 1;
 			}
-			var two=0;
-			for(var x = 0; x<6; x++){
+			let two=0;
+			for(let x = 0; x<6; x++){
 				if(checkgrid3(posx,posy+1,posz,x)==1){
 					two+=1;
 				}
@@ -170,8 +170,8 @@
 			if(grid[posx+1][posy][posz]>0 || posx>w-3){
 				return 1;
 			}
-			var two=0;
-			for(var x = 0; x<6; x++){
+			let two=0;
+			for(let x = 0; x<6; x++){
 				if(checkgrid3(posx+1,posy,posz,x)==1){
 					two+=1;
 				}
@@ -185,8 +185,8 @@
 			if(grid[posx][posy-1][posz]>0 || posy<2){
 				return 1;
 			}
-			var two=0;
-			for(var x = 0; x<6; x++){
+			let two=0;
+			for(let x = 0; x<6; x++){
 				if(checkgrid3(posx,posy-1,posz,x)==1){
 					two+=1;
 				}
@@ -200,8 +200,8 @@
 			if(grid[posx-1][posy][posz]>0 || posx<2){
 				return 1;
 			}
-			var two=0;
-			for(var x = 0; x<6; x++){
+			let two=0;
+			for(let x = 0; x<6; x++){
 				if(checkgrid3(posx-1,posy,posz,x)==1){
 					two+=1;
 				}
@@ -215,8 +215,8 @@
 			if(grid[posx][posy][posz+1]>0 || posz>depth-3){
 				return 1;
 			}
-			var two=0;
-			for(var x = 0; x<6; x++){
+			let two=0;
+			for(let x = 0; x<6; x++){
 				if(checkgrid3(posx,posy,posz+1,x)==1){
 					two+=1;
 				}
@@ -230,8 +230,8 @@
 			if(grid[posx][posy][posz-1]>0 || posz<2){
 				return 1;
 			}
-			var two=0;
-			for(var x = 0; x<6; x++){
+			let two=0;
+			for(let x = 0; x<6; x++){
 				if(checkgrid3(posx,posy,posz-1,x)==1){
 					two+=1;
 				}
@@ -307,26 +307,15 @@
 		return grid;
 	}
 
-	function top_left(){
-		for(var x = 0; x<w; x++){
-			for(var y = 0; y<h; y++){
-				if(grid[y][x]){
-					return x,y;
-				}
-			}
-		}
-		return -1;
-	}
-
 	//if back and forth continue, dont put
 	quadTree();
 //gen positions in order
 	function genPositions(){
-		var poss = [];
-		for(var x = 0; x<roots[0].length; x++) {
-			var curr = roots[0][x];
+		let poss = [];
+		for(let x = 0; x<roots[0].length; x++) {
+			let curr = roots[0][x];
 			//poss.push(new Array(curr[0],curr[1],curr[2]));
-			for(var y = 0; y<roots[1][x].length; y++) {
+			for(let y = 0; y<roots[1][x].length; y++) {
 				let dirr = roots[1][x][y];
 				if(dirr==0){
 					curr[1]+=1;
@@ -352,17 +341,15 @@
 		return poss;
 	}
 
-	let scene, camera, renderer, controls;
+	var scene, camera, renderer, controls;
 
-	let boxes, arr;
+	var boxes, arr;
 	boxes = [];
 	arr =[];
-	let width = window.innerWidth,
+	var width = window.innerWidth,
 	height = window.innerHeight;
 
-	const colors = [0x37BE95, 0xF3F3F3, 0x6549C0];
-
-	let continueAnim = true;
+	var continueAnim = true;
 
 	function init() {
 		scene = new THREE.Scene();
@@ -391,7 +378,7 @@
 		light.shadow.camera.top = 100;
 		light.shadow.camera.bottom = -100;
 		scene.add(light);
-		drawcenter();
+
 		document.body.appendChild(renderer.domElement);
 
 		window.addEventListener('resize', onResize);
@@ -414,7 +401,6 @@
 	}
 
 	var ler = 0.01;
-	var interval = 0.0;
 	var index = 0;
 	var stillgrowing = true;
 	var poses = genPositions();
@@ -444,10 +430,6 @@
 
 		//dont loop over colors already yellow
 		renderer.render(scene, camera);
-	}
-
-	function render2() {
-
 	}
 
 	const boxSize = new THREE.CubeGeometry(4,4,4);
